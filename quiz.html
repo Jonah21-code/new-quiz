@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QuizMind — Knowledge Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:        #0d0f1a;
+    --surface:   #151827;
+    --card:      #1c2035;
+    --border:    #2a2f4a;
+    --accent:    #7c5cfc;
+    --accent2:   #a78bfa;
+    --glow:      rgba(124,92,252,0.35);
+    --green:     #22d3a5;
+    --red:       #f87171;
+    --yellow:    #fbbf24;
+    --text:      #e8eaf6;
+    --muted:     #8892b0;
+    --radius:    14px;
+    --font-head: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  [data-theme="light"] {
+    --bg:      #f0f2ff;
+    --surface: #ffffff;
+    --card:    #f8f9ff;
+    --border:  #dde1f8;
+    --glow:    rgba(124,92,252,0.15);
+    --text:    #1a1d3a;
+    --muted:   #5a6080;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-head);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ── Layout ── */
+  .app {
+    width: 100%;
+    max-width: 680px;
+    position: relative;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .logo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--accent2);
+  }
+  .logo span { color: var(--accent); }
+  .topbar-actions { display: flex; gap: 10px; }
+
+  .icon-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 7px 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Screen base ── */
+  .screen {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    display: none;
+    animation: fadeUp 0.4s ease;
+  }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Welcome ── */
+  .welcome-badge {
+    display: inline-block;
+    background: var(--glow);
+    border: 1px solid var(--accent);
+    color: var(--accent2);
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+  .welcome-title {
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 14px;
+  }
+  .welcome-title em { font-style: normal; color: var(--accent2); }
+  .welcome-desc {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 32px;
+    max-width: 480px;
+  }
+
+  /* ── Controls (selects) ── */
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 6px; }
+  .ctrl-label {
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .ctrl-select {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: var(--font-head);
+    font-size: 0.9rem;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238892b0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    transition: border-color 0.2s;
+  }
+  .ctrl-select:focus { outline: none; border-color: var(--accent); }
+
+  /* ── Highscore display ── */
+  .highscore-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 28px;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+  .highscore-banner .hs-val {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--yellow);
+  }
+  .hs-icon { font-size: 1.1rem; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 24px var(--glow);
+  }
+  .btn-primary:hover {
+    background: var(--accent2);
+    box-shadow: 0 0 36px var(--glow);
+    transform: translateY(-1px);
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-full { width: 100%; }
+
+  /* ── Quiz screen ── */
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .q-counter {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  .q-counter strong { color: var(--accent2); }
+
+  .timer-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    transition: all 0.3s;
+  }
+  .timer-badge.warning { border-color: var(--yellow); color: var(--yellow); }
+  .timer-badge.danger  { border-color: var(--red);    color: var(--red); animation: pulse 0.6s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity: 0.5; } }
+
+  /* ── Progress bar ── */
+  .progress-wrap {
+    height: 4px;
+    background: var(--border);
+    border-radius: 100px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 0 10px var(--glow);
+  }
+
+  /* ── Category pill ── */
+  .category-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 4px 12px;
+    margin-bottom: 14px;
+  }
+  .diff-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+  .diff-dot.medium { background: var(--yellow); }
+  .diff-dot.hard   { background: var(--red); }
+
+  /* ── Question ── */
+  .question-text {
+    font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 28px;
+    color: var(--text);
+  }
+
+  /* ── Answer options ── */
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+
+  .option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    overflow: hidden;
+    user-select: none;
+  }
+  .option::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--glow), transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .option:hover:not(.disabled)::before { opacity: 1; }
+  .option:hover:not(.disabled) { border-color: var(--accent); transform: translateX(3px); }
+
+  .option-key {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.2s;
+    position: relative;
+    z-index: 1;
+  }
+  .option-text {
+    font-size: 0.92rem;
+    line-height: 1.45;
+    position: relative;
+    z-index: 1;
+  }
+
+  .option.selected { border-color: var(--accent); }
+  .option.selected .option-key { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .option.correct { border-color: var(--green); background: rgba(34,211,165,0.06); }
+  .option.correct .option-key { background: var(--green); border-color: var(--green); color: #000; }
+
+  .option.wrong { border-color: var(--red); background: rgba(248,113,113,0.06); }
+  .option.wrong .option-key { background: var(--red); border-color: var(--red); color: #fff; }
+
+  .option.disabled { cursor: default; }
+  .option.disabled:hover { transform: none; }
+
+  /* ── Quiz footer ── */
+  .quiz-footer { display: flex; justify-content: flex-end; }
+
+  /* ── Results ── */
+  .result-header { text-align: center; margin-bottom: 36px; }
+  .result-emoji {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 12px;
+    animation: bounce 0.6s ease;
+  }
+  @keyframes bounce {
+    0%   { transform: scale(0); }
+    60%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  .result-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+  }
+  .result-subtitle { color: var(--muted); font-size: 0.9rem; }
+
+  /* ── Score ring ── */
+  .score-ring-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+  .score-ring {
+    width: 140px; height: 140px;
+    position: relative;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring circle.track { fill: none; stroke: var(--border); stroke-width: 8; }
+  .score-ring circle.fill {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);
+    filter: drop-shadow(0 0 6px var(--accent));
+  }
+  .score-pct {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .score-pct span { font-size: 0.65rem; color: var(--muted); font-family: var(--font-head); }
+
+  /* ── Stat cards ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .stat-val {
+    font-family: var(--font-mono);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent2);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .stat-val.green { color: var(--green); }
+  .stat-val.red   { color: var(--red); }
+  .stat-lbl { font-size: 0.72rem; color: var(--muted); }
+
+  .hs-new {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(251,191,36,0.08);
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 24px;
+    font-size: 0.88rem;
+    color: var(--yellow);
+    font-weight: 600;
+  }
+
+  .result-actions { display: flex; gap: 12px; }
+  .result-actions .btn { flex: 1; }
+
+  /* ── Loading ── */
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 60px 40px;
+    text-align: center;
+  }
+  .spinner {
+    width: 44px; height: 44px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--muted); font-size: 0.9rem; }
+
+  /* ── Error ── */
+  .error-state {
+    text-align: center;
+    padding: 40px;
+  }
+  .error-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .error-msg { color: var(--muted); margin-bottom: 20px; font-size: 0.9rem; }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .screen { padding: 24px 20px; }
+    .controls { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .stat-card { padding: 12px 6px; }
+    .stat-val { font-size: 1.3rem; }
+    .result-actions { flex-direction: column; }
+    .btn { padding: 13px 20px; }
+  }
+  body{
+background: linear-gradient(50deg, red, blue, purple, black);
+  }
+  .app{
+    background-color: #2a2f4a;
+    border-radius: 5px;
+  }
+  .icon-btn{
+    background-color:#7c5cfc;
+    content: icon;
+    color: white;
+    width: 50px;
+    height: 30px;
+   /*padding: 10px;*/
+    margin-right: 10px;
+    margin-top: 10px;
+    
+  }
+  @keyframes bounce {
+    0%, 100%{
+        transform: translate(0);
+    }
+    50%{
+        transform: translateY(-10px);
+    }
+  }
+  .icon-btn:hover{
+    color: aquamarine;
+    animation: bounce 1s infinite;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="logo">Jet<span>Brains</span></div>
+    <div class="topbar-actions">
+    <button class="icon-btn" id="themeToggle" title="Toggle dark/light mode">🌙</button>
+    </div>
+  </div>
+
+  <!-- ─── WELCOME SCREEN ─── -->
+  <section class="screen active" id="welcomeScreen">
+    <div class="welcome-badge">⚡ Live from JONAH QUIZ</div>
+    <h1 class="welcome-title">Test your<br/><em>knowledge.</em></h1>
+    <p class="welcome-desc">
+      Challenge yourself with real trivia questions fetched live from the Open Trivia Database.
+      Pick a category and difficulty, then see how you rank.
+    </p>
+
+    <div id="highscoreBanner" class="highscore-banner" style="display:none">
+      <span class="hs-icon">🏆</span>
+      <span>Your best score: <span class="hs-val" id="hsDisplay">—</span></span>
+    </div>
+
+    <div class="controls">
+      <div class="ctrl-group">
+        <label class="ctrl-label" for="categorySelect">Category</label>
+        <select class="ctrl-select" id="categorySelect">
+          <option value="0">Any Category</option>
+          <option value="9">General Knowledge</option>
+          <option value="10">Books</option>
+          <option value="11">Film</option>
+          <option value="12">Music</option>
+          <option value="14">Television</option>
+          <option value="15">Video Games</option>
+          <option value="17">Science & Nature</option>
+          <option value="18">Computers</option>
+          <option value="19">Mathematics</option>
+          <option value="20">Mythology</option>
+          <option value="21">Sports</option>
+          <option value="22">Geography</option>
+          <option value="23">History</option>
+          <option value="27">Animals</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <label class="ctrl-label" for="difficultySelect">Difficulty</label>
+        <select class="ctrl-select" id="difficultySelect">
+          <option value="">Any Difficulty</option>
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <label class="ctrl-label" for="amountSelect">Questions</label>
+        <select class="ctrl-select" id="amountSelect">
+          <option value="5">5 Questions</option>
+          <option value="10" selected>10 Questions</option>
+          <option value="15">15 Questions</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <label class="ctrl-label" for="timerSelect">Timer</label>
+        <select class="ctrl-select" id="timerSelect">
+          <option value="0">No Timer</option>
+          <option value="15">15 s / Question</option>
+          <option value="30" selected>30 s / Question</option>
+          <option value="60">60 s / Question</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full" id="startBtn">
+      Start Quiz →
+    </button>
+  </section>
+
+  <!-- ─── LOADING SCREEN ─── -->
+  <section class="screen" id="loadingScreen">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p class="loading-text">Fetching questions from OpenTDB…</p>
+    </div>
+  </section>
+
+  <!-- ─── ERROR SCREEN ─── -->
+  <section class="screen" id="errorScreen">
+    <div class="error-state">
+      <div class="error-icon">⚠️</div>
+      <h2 style="margin-bottom:8px">Couldn't load questions</h2>
+      <p class="error-msg" id="errorMsg">Something went wrong. Please try again.</p>
+      <button class="btn btn-primary" id="retryBtn">Try Again</button>
+    </div>
+  </section>
+
+  <!-- ─── QUIZ SCREEN ─── -->
+  <section class="screen" id="quizScreen">
+    <div class="quiz-header">
+      <span class="q-counter">Q <strong id="qNum">1</strong> / <span id="qTotal">10</span></span>
+      <div class="timer-badge" id="timerBadge" style="display:none">
+        ⏱ <span id="timerVal">30</span>s
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+
+    <div class="category-pill">
+      <span class="diff-dot" id="diffDot"></span>
+      <span id="categoryLabel">General Knowledge</span>
+    </div>
+
+    <p class="question-text" id="questionText">Loading question…</p>
+
+    <div class="options" id="optionsList"></div>
+
+    <div class="quiz-footer">
+      <button class="btn btn-primary" id="nextBtn" style="display:none">
+        Next →
+      </button>
+    </div>
+  </section>
+
+  <!-- ─── RESULTS SCREEN ─── -->
+  <section class="screen" id="resultsScreen">
+    <div class="result-header">
+      <span class="result-emoji" id="resultEmoji">🎉</span>
+      <h2 class="result-title" id="resultTitle">Well done!</h2>
+      <p class="result-subtitle" id="resultSubtitle">Here's how you did</p>
+    </div>
+
+    <div class="score-ring-wrap">
+      <div class="score-ring">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle class="track" cx="70" cy="70" r="58"/>
+          <circle class="fill" id="scoreArc" cx="70" cy="70" r="58"
+            stroke-dasharray="364.4"
+            stroke-dashoffset="364.4"/>
+        </svg>
+        <div class="score-pct">
+          <span id="pctVal">0%</span>
+          <span>score</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <span class="stat-val" id="statTotal">0</span>
+        <div class="stat-lbl">Total</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val green" id="statCorrect">0</span>
+        <div class="stat-lbl">Correct</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val red" id="statWrong">0</span>
+        <div class="stat-lbl">Wrong</div>
+      </div>
+    </div>
+
+    <div class="hs-new" id="newHsMsg" style="display:none">
+      🏆 New High Score! You beat your previous best!
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-outline" id="homeBtn">← Home</button>
+      <button class="btn btn-primary" id="restartBtn">Play Again →</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+const state = {
+  questions:    [],
+  currentIndex: 0,
+  score:        0,
+  answered:     false,
+  timer:        null,
+  timeLeft:     0,
+  timerSeconds: 0,
+  settings:     { category: '0', difficulty: '', amount: 10, timer: 30 },
+};
+
+// ─────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+
+function decodeHTML(html) {
+  const txt = document.createElement('textarea');
+  txt.innerHTML = html;
+  return txt.value;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+function getHighScore(key) {
+  return parseInt(localStorage.getItem(key) || '0', 10);
+}
+function saveHighScore(key, val) {
+  localStorage.setItem(key, val);
+}
+
+function getHSKey() {
+  const { category, difficulty, amount } = state.settings;
+  return `qm_hs_${category}_${difficulty || 'any'}_${amount}`;
+}
+
+// ─────────────────────────────────────────────
+//  THEME TOGGLE
+// ─────────────────────────────────────────────
+const themeBtn = $('themeToggle');
+let darkMode = true;
+themeBtn.addEventListener('click', () => {
+  darkMode = !darkMode;
+  document.documentElement.setAttribute('data-theme', darkMode ? '' : 'light');
+  themeBtn.textContent = darkMode ? '🌙' : '☀️';
+});
+
+// ─────────────────────────────────────────────
+//  WELCOME — highscore banner
+// ─────────────────────────────────────────────
+function updateHSBanner() {
+  const hs = getHighScore(getHSKey());
+  if (hs > 0) {
+    $('highscoreBanner').style.display = 'flex';
+    const tot = parseInt($('amountSelect').value, 10);
+    $('hsDisplay').textContent = `${hs} / ${tot}`;
+  } else {
+    $('highscoreBanner').style.display = 'none';
+  }
+}
+
+[$('categorySelect'), $('difficultySelect'), $('amountSelect')].forEach(el => {
+  el.addEventListener('change', updateHSBanner);
+});
+updateHSBanner();
+
+// ─────────────────────────────────────────────
+//  FETCH
+// ─────────────────────────────────────────────
+async function fetchQuestions() {
+  const { category, difficulty, amount } = state.settings;
+  let url = `https://opentdb.com/api.php?amount=${amount}&type=multiple`;
+  if (category !== '0') url += `&category=${category}`;
+  if (difficulty)        url += `&difficulty=${difficulty}`;
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.response_code !== 0) {
+    const msgs = {
+      1: 'Not enough questions for your selection — try a different category or difficulty.',
+      2: 'Invalid parameters.',
+      5: 'Too many requests — please wait a moment.',
+    };
+    throw new Error(msgs[data.response_code] || 'API returned an error.');
+  }
+  return data.results;
+}
+
+// ─────────────────────────────────────────────
+//  START QUIZ
+// ─────────────────────────────────────────────
+$('startBtn').addEventListener('click', startQuiz);
+$('retryBtn').addEventListener('click', startQuiz);
+
+async function startQuiz() {
+  state.settings = {
+    category:   $('categorySelect').value,
+    difficulty: $('difficultySelect').value,
+    amount:     parseInt($('amountSelect').value, 10),
+    timer:      parseInt($('timerSelect').value, 10),
+  };
+
+  showScreen('loadingScreen');
+
+  try {
+    const raw = await fetchQuestions();
+    state.questions = raw.map(q => ({
+      question:      decodeHTML(q.question),
+      correct:       decodeHTML(q.correct_answer),
+      options:       shuffle([q.correct_answer, ...q.incorrect_answers].map(decodeHTML)),
+      category:      decodeHTML(q.category),
+      difficulty:    q.difficulty,
+    }));
+    state.currentIndex = 0;
+    state.score        = 0;
+    renderQuestion();
+    showScreen('quizScreen');
+  } catch (err) {
+    $('errorMsg').textContent = err.message || 'Could not load questions.';
+    showScreen('errorScreen');
+  }
+}
+
+// ─────────────────────────────────────────────
+//  RENDER QUESTION
+// ─────────────────────────────────────────────
+function renderQuestion() {
+  clearTimer();
+  state.answered = false;
+
+  const q   = state.questions[state.currentIndex];
+  const tot = state.questions.length;
+  const idx = state.currentIndex;
+
+  // Header
+  $('qNum').textContent   = idx + 1;
+  $('qTotal').textContent = tot;
+
+  // Progress
+  $('progressFill').style.width = `${(idx / tot) * 100}%`;
+
+  // Category pill
+  $('categoryLabel').textContent = q.category;
+  const dot = $('diffDot');
+  dot.className = 'diff-dot';
+  if (q.difficulty === 'medium') dot.classList.add('medium');
+  if (q.difficulty === 'hard')   dot.classList.add('hard');
+
+  // Question
+  $('questionText').textContent = q.question;
+
+  // Options
+  const keys = ['A', 'B', 'C', 'D'];
+  const list = $('optionsList');
+  list.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.dataset.answer = opt;
+    div.innerHTML = `
+      <span class="option-key">${keys[i]}</span>
+      <span class="option-text">${opt}</span>
+    `;
+    div.addEventListener('click', () => selectAnswer(div, opt, q.correct));
+    list.appendChild(div);
+  });
+
+  // Next button
+  $('nextBtn').style.display = 'none';
+
+  // Timer
+  if (state.settings.timer > 0) {
+    $('timerBadge').style.display = 'flex';
+    startTimer(state.settings.timer, q.correct);
+  } else {
+    $('timerBadge').style.display = 'none';
+  }
+}
+
+// ─────────────────────────────────────────────
+//  ANSWER SELECTION
+// ─────────────────────────────────────────────
+function selectAnswer(el, chosen, correct) {
+  if (state.answered) return;
+  state.answered = true;
+  clearTimer();
+
+  const allOpts = document.querySelectorAll('.option');
+  allOpts.forEach(o => {
+    o.classList.add('disabled');
+    if (o.dataset.answer === correct) o.classList.add('correct');
+  });
+
+  if (chosen === correct) {
+    el.classList.add('correct');
+    state.score++;
+  } else {
+    el.classList.add('wrong');
+  }
+
+  $('nextBtn').style.display = 'flex';
+}
+
+// ─────────────────────────────────────────────
+//  TIMER
+// ─────────────────────────────────────────────
+function startTimer(seconds, correct) {
+  state.timeLeft = seconds;
+  updateTimerUI();
+
+  state.timer = setInterval(() => {
+    state.timeLeft--;
+    updateTimerUI();
+    if (state.timeLeft <= 0) {
+      clearTimer();
+      // Auto-submit with no answer (time's up)
+      autoExpire(correct);
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  const badge = $('timerBadge');
+  $('timerVal').textContent = state.timeLeft;
+  badge.className = 'timer-badge';
+  if (state.timeLeft <= 5)  badge.classList.add('danger');
+  else if (state.timeLeft <= 10) badge.classList.add('warning');
+}
+
+function clearTimer() {
+  clearInterval(state.timer);
+  state.timer = null;
+}
+
+function autoExpire(correct) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const allOpts = document.querySelectorAll('.option');
+  allOpts.forEach(o => {
+    o.classList.add('disabled');
+    if (o.dataset.answer === correct) o.classList.add('correct');
+  });
+
+  $('nextBtn').style.display = 'flex';
+}
+
+// ─────────────────────────────────────────────
+//  NEXT QUESTION
+// ─────────────────────────────────────────────
+$('nextBtn').addEventListener('click', () => {
+  state.currentIndex++;
+  if (state.currentIndex < state.questions.length) {
+    renderQuestion();
+  } else {
+    showResults();
+  }
+});
+
+// ─────────────────────────────────────────────
+//  RESULTS
+// ─────────────────────────────────────────────
+function showResults() {
+  clearTimer();
+
+  const total   = state.questions.length;
+  const correct = state.score;
+  const wrong   = total - correct;
+  const pct     = Math.round((correct / total) * 100);
+
+  // Emoji & title
+  let emoji, title, subtitle;
+  if (pct === 100) { emoji = '🏆'; title = 'Perfect Score!';   subtitle = 'Absolutely flawless — a true master.'; }
+  else if (pct >= 80) { emoji = '🎉'; title = 'Excellent!';    subtitle = 'You really know your stuff.'; }
+  else if (pct >= 60) { emoji = '👍'; title = 'Good Job!';     subtitle = 'A solid performance overall.'; }
+  else if (pct >= 40) { emoji = '🤔'; title = 'Keep Trying!';  subtitle = 'Review the topics and come back stronger.'; }
+  else                { emoji = '😅'; title = 'Tough Round!';  subtitle = 'Don\'t give up — try again!'; }
+
+  $('resultEmoji').textContent   = emoji;
+  $('resultTitle').textContent   = title;
+  $('resultSubtitle').textContent = subtitle;
+
+  // Stats
+  $('statTotal').textContent   = total;
+  $('statCorrect').textContent = correct;
+  $('statWrong').textContent   = wrong;
+  $('pctVal').textContent      = `${pct}%`;
+
+  // Arc
+  const circ   = 2 * Math.PI * 58; // 364.4
+  const offset = circ - (pct / 100) * circ;
+  setTimeout(() => {
+    $('scoreArc').style.strokeDashoffset = offset;
+  }, 100);
+
+  // High score
+  const hsKey  = getHSKey();
+  const prevHS = getHighScore(hsKey);
+  if (correct > prevHS) {
+    saveHighScore(hsKey, correct);
+    $('newHsMsg').style.display = 'flex';
+  } else {
+    $('newHsMsg').style.display = 'none';
+  }
+
+  // Progress bar to 100%
+  $('progressFill').style.width = '100%';
+
+  showScreen('resultsScreen');
+}
+
+// ───────────────────────────────────────────
+//  RESTART / HOME
+// ─────────────────────────────────────────────
+$('restartBtn').addEventListener('click', startQuiz);
+
+$('homeBtn').addEventListener('click', () => {
+  updateHSBanner();
+  showScreen('welcomeScreen');
+});
+</script>
+</body>
+</html>
