@@ -76,33 +76,43 @@ font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
     @keyframes ani {
       0%{content: "SPORT";
+      color: red;
     }
       10%{content: "ANIMAL";
+      color: burlywood;
     
     }
       20%{content: "HISTORY";
+      color: rgb(224, 69, 69);
     
     }
-    30%{content: "FILM";}
-40%{content: "SCIENCE";}
-50%{content: "NATURE";}
-60%{content:"MUSIC" ;}
-70%{content: "COMPUTER";}
-80%{content:"GEOGRAPHY"}
+    30%{content: "FILM";
+  color:black;}
+40%{content: "SCIENCE";
+color: wheat;}
+50%{content: "NATURE";
+color: #104222;}
+60%{content:"MUSIC";
+color: gold;}
+70%{content: "COMPUTER";
+color: blue;}
+80%{content:"GEOGRAPHY";
+color: green;}
     }
 
     #theme-btn {
-      background: var(--card);
+      background: var(--card2);
       border: 1px solid var(--border);
       color: var(--text);
       padding: 8px 14px;
       border-radius: 999px;
       cursor: pointer;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       font-family: 'Inter', sans-serif;
       transition: background 0.2s;
     }
-    #theme-btn:hover { background: var(--card2); }
+    #theme-btn:hover { background: var(--card);
+    transform: scale(1.1); }
 
     .card {
       background: var(--card);
@@ -192,6 +202,7 @@ font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
       cursor: pointer;
       transition: transform 0.1s, opacity 0.2s;
     }
+    
     .btn:active { transform: scale(0.98); }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-primary:hover { background: var(--accent-h); }
@@ -440,7 +451,7 @@ font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
       <div class="welcome-icon"> 🧠</div>
       <h1 class="welcome-title">TEST YOUR KNOWLEDGE</h1>
       <p class="welcome-sub">
-        Fetch real questions from the Open Trivia Database,
+        Fetch real questions,
         race against the clock, and see how you rank!
       </p>
 
