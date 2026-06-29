@@ -9,11 +9,11 @@
   <style>
     :root {
       --bg:        #0F172A;
-      --card:      linear-gradient(50deg, #6366F1,#22C55E,yellow);
+      --card:      linear-gradient(50deg, #1c1d53,#104222,rgb(92, 92, 22));
       --card2:     #263348;
       --border:    #334155;
       --text:      #F8FAFC;
-      --muted:     rgb(17, 66, 129);
+      --muted:     rgb(164, 170, 247);
       --accent:    #6366F1;
       --accent-h:  #4F46E5;
       --correct:   green;
@@ -398,7 +398,7 @@ font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
       .question-text { font-size: 1rem; }
     }
     .logo::after{
-      content: "🧠";
+      content: " 🧠";
       color: yellow;
       animation: col ease-in-out 15s 1s infinite;
     }
@@ -407,13 +407,29 @@ font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 50%{color:#22C55E ;}
 100%{color: #6366F1;}
     }
+    #high-score{
+      color: orange;
+    }
+    #high-score::before{
+      content: "🏆";
+      color: #65e092;
+      transform: scale(1);
+      animation: high ease-in-out 2s 1s infinite ;
+    }
+    @keyframes high {
+      0%{color: #1c1d53;}
+      50%{
+      color: #104222;}
+    
+    }
+    
   </style>
 </head>
 
 <body>
 
   <header>
-    <div class="logo"><span> QUIZ </span></div>
+    <div class="logo"><span>  QUIZ </span></div>
     <button id="theme-btn">🌙 Dark Mode</button>
   </header>
 
@@ -421,7 +437,7 @@ font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 
     <!-- SCREEN 1: WELCOME -->
     <div id="screen-welcome" class="screen active">
-      <div class="welcome-icon">🧠</div>
+      <div class="welcome-icon"> 🧠</div>
       <h1 class="welcome-title">TEST YOUR KNOWLEDGE</h1>
       <p class="welcome-sub">
         Fetch real questions from the Open Trivia Database,
@@ -440,6 +456,11 @@ font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
           <option value="12">Music</option>
           <option value="18">Computers</option>
           <option value="22">Geography</option>
+                    <option value="10">books</option>
+                      <option value="24">politics</option>
+                    <option value="28">vehicles</option>
+
+
         </select>
       </div>
 
@@ -453,7 +474,7 @@ font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
       </div>
 
       <div class="high-scores-preview">
-        <h3>🏆 High Scores</h3>
+        <h3 id="high-score"> High Scores</h3>
         <div id="scores-list"></div>
       </div>
 
@@ -639,7 +660,7 @@ font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
      // return data.results;
     //}
     async function fetchQuestions(category, difficulty) {
-  const url = `https://opentdb.com/api.php?amount=10&category=${category}&difficulty=${difficulty}&type=multiple`;
+  const url = `https://opentdb.com/api.php?amount=20&category=${category}&difficulty=${difficulty}&type=multiple`;
 
   try {
     const response = await fetch(url, {
@@ -737,7 +758,7 @@ font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 
     // ── TIMER ──
     function startTimer() {
-      timeLeft = 30;
+      timeLeft = 35;
       updateTimerDisplay();
       clearInterval(timerID);
       timerID = setInterval(function() {
